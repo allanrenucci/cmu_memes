@@ -1,0 +1,27 @@
+{% comment %}
+
+  A reusable form template.
+  
+  form        The form object.
+
+{% endcomment %}
+
+{% load widget_tweaks %}
+
+{% for field in form.visible_fields %}
+<div class="form-group">
+  <label for="{{ field.id_for_label }}" class="control-label">{{ field.label }}</label>
+  {% render_field field class+="form-control" placeholder=field.label %}
+  {% if field.errors %}
+  <div class="has-error">
+  {% for error in field.errors %}
+    <p class="help-block">{{ error }}</p>
+  {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endfor %}
+  
+{% for hidden in form.hidden_fields %}
+  {{ hidden }}
+{% endfor %}

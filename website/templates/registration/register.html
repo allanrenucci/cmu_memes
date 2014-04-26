@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+<form class="form-centered" role="form" method="post" action="{% url 'register' %}">
+<h2>Please Register</h2>
+{% for error in form.non_field_errors %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+{% include "form_snippet.html" with form=form %}
+<div class="form-group">
+	<button type="submit" class="btn btn-lg btn-block btn-red">Register</button>
+</div>
+{% csrf_token %}
+</form>
+	
+{% endblock main_content %}
