@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+
+<h1 class="page-header">{{ user.username }}'s Profile</h1>
+
+{% for info in infos %}
+{% include "alert.html" with type="alert-success" message=info %}
+{% endfor %}
+
+<p class="lead row">
+	<span class="col-md-2">Username:</span>
+	<span class="col-md-2">{{ user.username }}</span>
+</p>
+
+{% if user.first_name %}
+<p class="lead row">
+	<span class="col-md-2">First name:</span>
+	<span class="col-md-2">{{ user.first_name }}</span>
+</p>
+{% endif %}
+
+{% if user.last_name %}
+<p class="lead row">
+	<span class="col-md-2">Last name:</span>
+	<span class="col-md-2">{{ user.last_name }}</span>
+</p>
+{% endif %}
+
+<p class="lead row">
+	<span class="col-md-2">Email:</span>
+	<span class="col-md-2">{{ user.email }}</span>
+</p>
+
+<hr>
+
+<button class="btn btn-red btn-lg" data-toggle="modal" data-target="#profile-modal">Update Profile</button>
+<button class="btn btn-red btn-lg" data-toggle="modal" data-target="#password-modal">Set Password</button>
+<button class="btn btn-red btn-lg" data-toggle="modal" data-target="#delete-modal">Delete Account</button>
+
+<!-- ************************************
+					
+					MODALS
+
+************************************** -->
+
+<div class="modal" id="profile-modal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+	    		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	    		<h3 class="modal-title">Update Profile</h3>
+			</div>
+			<div class="modal-body">
+				{% for error in profile_form.non_field_errors %}
+				<div class="alert alert-danger">{{ error }}</div>
+				{% endfor %}
+				<form method="post" action="{% url 'update profile' %}">
+					{% include "form_snippet.html" with form=profile_form %}
+					{% csrf_token %}
+					<button type="submit" class="btn btn-red btn-block">Submit</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal" id="password-modal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+	    		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	    		<h3 class="modal-title">Set Password</h3>
+			</div>
+			<div class="modal-body">
+				{% for error in password_form.non_field_errors %}
+				<div class="alert alert-danger">{{ error }}</div>
+				{% endfor %}
+				<form method="post" action="{% url 'set password' %}">
+					{% include "form_snippet.html" with form=password_form %}
+					{% csrf_token %}
+					<button type="submit" class="btn btn-red btn-block">Submit</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal" id="delete-modal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+	    		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	    		<h3 class="modal-title">Delete Account Confirmation</h3>
+			</div>
+			<div class="modal-body">
+				<p>Are you sure you want to delete your account?</p>
+				<a class="btn btn-red btn-lg" href="{% url 'delete profile' %}">Yes</a>
+				<button type="button" class="btn btn-red btn-lg" data-dismiss="modal">No</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- ************************************
+					
+				END MODALS
+
+************************************** -->
+{% endblock main_content %}
+
+{% block script %}
+
+{% if profile_form.errors %}
+<script>$('#profile-modal').modal('toggle');</script>
+{% endif %}
+
+{% if password_form.errors %}
+<script>$('#password-modal').modal('toggle');</script>
+{% endif %}
+
+<script>$(".alert").alert();</script>
+
+{% endblock script %}

@@ -1,0 +1,9 @@
+{% comment %}
+	type	"alert-success | alert-warning | alert-danger | alert-info"
+	message	The alert message
+{% endcomment %}
+
+<div class="alert {{ type }}">
+    <a href="#" class="close" data-dismiss="alert">&times;</a>
+    {{ message }}
+</div>
