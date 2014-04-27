@@ -32,13 +32,17 @@
 	<span class="col-md-2">{{ user.email }}</span>
 </p>
 
-<button class="btn btn-red btn-lg" data-toggle="modal" data-target="#profile-modal">Update Profile</button>
-<button class="btn btn-red btn-lg" data-toggle="modal" data-target="#password-modal">Set Password</button>
-<button class="btn btn-red btn-lg" data-toggle="modal" data-target="#delete-modal">Delete Account</button>
+<div class="row">
+	<button class="btn btn-red btn-lg col-md-2 col-md-offset-1" data-toggle="modal" data-target="#profile-modal">Update Profile</button>
+	<button class="btn btn-red btn-lg col-md-2 col-md-offset-1" data-toggle="modal" data-target="#password-modal">Set Password</button>
+	<button class="btn btn-red btn-lg col-md-2 col-md-offset-1" data-toggle="modal" data-target="#delete-modal">Delete Account</button>
+</div>
 
 <hr>
 
+{% if memes %}
 <h1>{{ user.username }}'s memes</h1>
+{% endif %}
 
 {% for meme in memes %}
 <div class="panel panel-default">

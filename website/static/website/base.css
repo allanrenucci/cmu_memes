@@ -37,7 +37,11 @@ body {
 }
 
 .navbar-red .navbar-nav > li > a {
-    color:#fff;
+    color: #fff;
+}
+
+.navbar-red .navbar-toggle .icon-bar {
+    background-color: #fff;
 }
 
 .navbar-red .navbar-nav > li > a:hover,
