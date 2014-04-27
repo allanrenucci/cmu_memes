@@ -3,6 +3,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 # Decorator require_POST
 from django.views.decorators.http import require_POST
 
+# Needed to manually create HttpResponses or raise an Http404 exception
+from django.http import HttpResponse, Http404
+
 # Decorator transaction.atomic
 from django.db import transaction
 
@@ -13,11 +16,20 @@ from django.contrib.auth import login, authenticate
 # Decorator to use built-in authentication system
 from django.contrib.auth.decorators import login_required
 
+# Helper function to guess a MIME type from a file name
+from mimetypes import guess_type
+
 from models import *
 from forms import *
 
+def about(request):
+	return render(request, 'website/about.html')
+
 def home(request):
-	return render(request, 'website/index.html')
+	context = {}
+	context['memes'] = Meme.get_memes()
+	context['form'] = MemeForm()
+	return render(request, 'website/index.html', context)
 
 
 @transaction.atomic
@@ -51,12 +63,14 @@ def profile(request):
 	context = {}
 	user = request.user
 
+	context['memes'] = Meme.get_memes(author=user)
 	context['password_form'] = PasswordForm()
 	context['profile_form'] = ProfileForm(instance=user)
 	return render(request, 'registration/profile.html', context)
 
 @require_POST
 @login_required
+@transaction.atomic
 def set_password(request):
 	context = {}
 	user = request.user
@@ -68,15 +82,17 @@ def set_password(request):
 		user.set_password(pwd)
 		user.save()
 		context['password_form'] = PasswordForm()
-		context['infos'] = ["Password successfully changed!"]
+		context['infos'] = ['Password successfully changed!']
 	else:
 		context['password_form'] = form
 
+	context['memes'] = Meme.get_memes(author=user)
 	context['profile_form'] = ProfileForm(instance=user)
 	return render(request, 'registration/profile.html', context)
 
 @require_POST
 @login_required
+@transaction.atomic
 def update_profile(request):
 	context = {}
 	user = request.user
@@ -86,14 +102,52 @@ def update_profile(request):
 	if form.is_valid():
 		form.save()
 		context['profile_form'] = ProfileForm(instance=user)
-		context['infos'] = ["Profile successfully updated!"]
+		context['infos'] = ['Profile successfully updated!']
 	else:
 		context['profile_form'] = form
 	
+	context['memes'] = Meme.get_memes(author=user)
 	context['password_form'] = PasswordForm()
 	return render(request, 'registration/profile.html', context)
 
 @login_required
+@transaction.atomic
 def delete_profile(request):
+	context = {}
 	request.user.delete()
+	context['memes'] = Meme.get_memes()
+	context['infos'] = ['Your account was successfully deleted!']
+	return render(request, 'website/index.html', context)
+
+@require_POST
+@login_required
+@transaction.atomic
+def post_meme(request):
+	context = {}
+	new_meme = Meme(author=request.user)
+	form = MemeForm(request.POST, request.FILES, instance=new_meme)
+
+	if form.is_valid():
+		form.save()
+		form = MemeForm()
+
+	context['form'] = form
+	context['memes'] = Meme.get_memes()
+	return render(request, 'website/index.html', context)
+
+def get_picture(request, id):
+	meme = get_object_or_404(Meme, id=id)	
+
+	if not meme.picture:
+		raise Http404
+
+	content_type = guess_type(meme.picture.name)
+	return HttpResponse(meme.picture, content_type=content_type)
+
+
+@login_required
+@transaction.atomic
+def delete_meme(request, id):
+	meme = get_object_or_404(Meme, author=request.user, id=id)
+	meme.delete()
 	return redirect('home')

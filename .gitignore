@@ -56,6 +56,7 @@ coverage.xml
 *.log
 *.pot
 staticfiles
+media
 db.sqlite3
 
 # Sphinx documentation

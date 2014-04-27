@@ -32,11 +32,26 @@
 	<span class="col-md-2">{{ user.email }}</span>
 </p>
 
-<hr>
-
 <button class="btn btn-red btn-lg" data-toggle="modal" data-target="#profile-modal">Update Profile</button>
 <button class="btn btn-red btn-lg" data-toggle="modal" data-target="#password-modal">Set Password</button>
 <button class="btn btn-red btn-lg" data-toggle="modal" data-target="#delete-modal">Delete Account</button>
+
+<hr>
+
+<h1>{{ user.username }}'s memes</h1>
+
+{% for meme in memes %}
+<div class="panel panel-default">
+	<div class="panel-heading">
+	    <a href="{% url 'delete meme' meme.id %}" type="button" class="close" aria-hidden="true">&times;</a>
+		<h3 class="panel-title">{{ meme.title }}</h3>
+	</div>
+	<div class="panel-body">
+		<img src="{% url 'picture' meme.id %}" alt="" class="img-rounded img-responsive center-block">
+	</div>
+	<div class="panel-footer">Posted on {{ meme.date }} by {{ meme.author }}</div>
+</div>
+{% endfor %}
 
 <!-- ************************************
 					
@@ -94,9 +109,11 @@
 	    		<h3 class="modal-title">Delete Account Confirmation</h3>
 			</div>
 			<div class="modal-body">
-				<p>Are you sure you want to delete your account?</p>
-				<a class="btn btn-red btn-lg" href="{% url 'delete profile' %}">Yes</a>
-				<button type="button" class="btn btn-red btn-lg" data-dismiss="modal">No</button>
+					<p class="text-centered lead">Are you sure you want to delete your account?</p>
+				<div class="row">
+					<a class="btn btn-red btn-lg col-md-2 col-md-offset-3" href="{% url 'delete profile' %}">Yes</a>
+					<button type="button" class="btn btn-red btn-lg col-md-2 col-md-offset-2" data-dismiss="modal">No</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -107,6 +124,7 @@
 				END MODALS
 
 ************************************** -->
+
 {% endblock main_content %}
 
 {% block script %}
@@ -118,7 +136,5 @@
 {% if password_form.errors %}
 <script>$('#password-modal').modal('toggle');</script>
 {% endif %}
-
-<script>$(".alert").alert();</script>
 
 {% endblock script %}

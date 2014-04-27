@@ -80,4 +80,9 @@ class PasswordForm(forms.Form):
 
 		return pwd
 
+class MemeForm(forms.ModelForm):
+	class Meta:
+		model = Meme
+		fields = ['title', 'picture']
+
 	

@@ -1,5 +1,64 @@
 {% extends "base.html" %}
 
+{% load widget_tweaks %}
+
 {% block main_content %}
-<h1>Hello World!</h1>
+
+{% for info in infos %}
+{% include "alert.html" with type="alert-success" message=info %}
+{% endfor %}
+
+{% if user.is_authenticated %}
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h3 class="panel-title">Post a new meme!</h3>
+	</div>
+	<div class="panel-body">
+		<form class="form-post" enctype="multipart/form-data" role="form" method="post" action="{% url 'post meme' %}">
+			<div class="form-group">
+				<label for="{{ form.title.id_for_label }}" class="control-label">{{ form.title.label }}</label>
+				{% render_field form.title class+="form-control" placeholder=form.title.label %}
+				{% if form.title.errors %}
+				<div class="has-error">
+				{% for error in form.title.errors %}
+				<p class="help-block">{{ error }}</p>
+				{% endfor %}
+				</div>
+				{% endif %}
+			</div>
+			<div class="form-group">
+				<label for="{{ form.picture.id_for_label }}" class="control-label">{{ form.picture.label }}</label>
+				{{ form.picture }}
+				<p class="help-block">Choose a picture to upload.</p>
+				{% if form.picture.errors %}
+				<div class="has-error">
+				{% for error in form.picture.errors %}
+				<p class="help-block">{{ error }}</p>
+				{% endfor %}
+				</div>
+				{% endif %}
+			</div>
+			<div class="form-group">
+				<button type="submit" class="btn btn-lg btn-block btn-red">Post</button>
+			</div>
+			{% csrf_token %}
+		</form>	
+	</div>
+</div>
+
+{% endif %}
+
+{% for meme in memes %}
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<h3 class="panel-title">{{ meme.title }}</h3>
+	</div>
+	<div class="panel-body">
+		<img src="{% url 'picture' meme.id %}" alt="" class="img-rounded img-responsive center-block">
+	</div>
+	<div class="panel-footer">Posted on {{ meme.date }} by {{ meme.author }}</div>
+</div>
+{% endfor %}
+
 {% endblock main_content %}

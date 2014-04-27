@@ -1,11 +1,21 @@
 body {
-  padding-top: 50px;
+  padding-top: 60px;
+}
+
+.text-centered {
+    text-align: center; 
 }
 
 .form-centered {
 	max-width: 330px;
 	padding: 15px;
 	margin: 0 auto;
+}
+
+.form-post {
+    max-width: 400px;
+    padding: 15px;
+    margin: 0 auto;
 }
 
 .btn-red:hover {
