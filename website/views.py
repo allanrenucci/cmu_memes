@@ -153,7 +153,7 @@ def get_picture(request, id):
 def delete_meme(request, id):
 	meme = get_object_or_404(Meme, author=request.user, id=id)
 	meme.delete()
-	return redirect('home')
+	return redirect('profile')
 
 @login_required
 @transaction.atomic

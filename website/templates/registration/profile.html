@@ -2,11 +2,11 @@
 
 {% block main_content %}
 
-<h1 class="page-header">{{ user.username }}'s Profile</h1>
-
 {% for info in infos %}
 {% include "alert.html" with type="alert-success" message=info %}
 {% endfor %}
+
+<h1 class="page-header">{{ user.username }}'s Profile</h1>
 
 <p class="lead row">
 	<span class="col-md-2">Username:</span>
