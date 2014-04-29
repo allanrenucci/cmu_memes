@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Meme(models.Model):
-	author = models.ForeignKey(User)
+	author = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
 	date = models.DateTimeField(auto_now_add=True)
 	title = models.CharField(max_length=60)
 	picture = models.ImageField(upload_to='memes/')

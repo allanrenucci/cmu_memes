@@ -14,7 +14,7 @@ from django.db import transaction
 
 # Create and log in a user
 from django.contrib.auth.models import User
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, logout, authenticate
 
 # Decorator to use built-in authentication system
 from django.contrib.auth.decorators import login_required
@@ -118,6 +118,7 @@ def update_profile(request):
 def delete_profile(request):
 	context = {}
 	request.user.delete()
+	logout(request)
 	context['memes'] = Meme.get_memes()
 	context['infos'] = ['Your account was successfully deleted!']
 	return render(request, 'website/index.html', context)
