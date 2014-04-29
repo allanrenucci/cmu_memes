@@ -4,7 +4,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
 # Needed to manually create HttpResponses or raise an Http404 exception
-from django.http import HttpResponse, Http404
+from django.http import StreamingHttpResponse, Http404
+
+# Convert data to json format
+import json
 
 # Decorator transaction.atomic
 from django.db import transaction
@@ -142,7 +145,7 @@ def get_picture(request, id):
 		raise Http404
 
 	content_type = guess_type(meme.picture.name)
-	return HttpResponse(meme.picture, content_type=content_type)
+	return StreamingHttpResponse(meme.picture, content_type=content_type)
 
 
 @login_required
@@ -151,3 +154,69 @@ def delete_meme(request, id):
 	meme = get_object_or_404(Meme, author=request.user, id=id)
 	meme.delete()
 	return redirect('home')
+
+@login_required
+@transaction.atomic
+def meme_upvote(request, id):
+	data = {}
+	meme = get_object_or_404(Meme, id=id)
+
+	vote, _ = Vote.objects.get_or_create(
+		meme=meme, owner=request.user,
+		defaults={'value': Vote.NONE}
+	)
+
+	if vote.value == vote.NONE:
+		vote.value = Vote.UP
+		meme.up_vote_count += 1
+
+	elif vote.value == vote.UP:
+		vote.value = Vote.NONE
+		meme.up_vote_count -= 1
+
+	elif vote.value == Vote.DOWN:
+		vote.value = Vote.UP
+		meme.up_vote_count += 1
+		meme.down_vote_count -= 1
+
+	meme.save()
+	vote.save()
+
+	data['up_vote'] = meme.up_vote_count
+	data['down_vote'] = meme.down_vote_count
+	content = json.dumps(data)
+	content_type = "application/json"
+	return StreamingHttpResponse(content, content_type=content_type)
+
+@login_required
+@transaction.atomic
+def meme_downvote(request, id):
+	data = {}
+	meme = get_object_or_404(Meme, id=id)
+
+	vote, _ = Vote.objects.get_or_create(
+		meme=meme, owner=request.user,
+		defaults={'value': Vote.NONE}
+	)
+
+	if vote.value == vote.NONE:
+		vote.value = Vote.DOWN
+		meme.down_vote_count += 1
+
+	elif vote.value == vote.UP:
+		vote.value = Vote.DOWN
+		meme.up_vote_count -= 1
+		meme.down_vote_count += 1
+
+	elif vote.value == Vote.DOWN:
+		vote.value = Vote.NONE
+		meme.down_vote_count -= 1
+
+	meme.save()
+	vote.save()
+
+	data['up_vote'] = meme.up_vote_count
+	data['down_vote'] = meme.down_vote_count
+	content = json.dumps(data)
+	content_type = "application/json"
+	return StreamingHttpResponse(content, content_type=content_type)

@@ -12,6 +12,8 @@ urlpatterns = patterns('website.views',
 
 	url(r'^post/$', 'post_meme', name='post meme'),
 	url(r'^delete/(?P<id>\d+)/$', 'delete_meme', name ='delete meme'),
+	url(r'^upvote/(?P<id>\d+)/$', 'meme_upvote', name='meme upvote'),
+	url(r'^downvote/(?P<id>\d+)/$', 'meme_downvote', name='meme downvote'),
 
 	url(r'^picture/(?P<id>\d+)/$', 'get_picture', name='picture'),
 )

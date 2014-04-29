@@ -2,10 +2,6 @@ body {
   padding-top: 60px;
 }
 
-.text-centered {
-    text-align: center; 
-}
-
 .form-centered {
 	max-width: 330px;
 	padding: 15px;
@@ -59,4 +55,13 @@ body {
 .navbar-red .navbar-brand:hover {
     color:#eeeeee;
     background-color: #d2322d;
+}
+
+.meme-info {
+    padding-top: 10px;
+    font-size: 16px;
+}
+
+.meme-title {
+    font-size: 30px;
 }
