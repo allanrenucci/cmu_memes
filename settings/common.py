@@ -44,6 +44,16 @@ ROOT_URLCONF = 'cmu_memes.urls'
 
 WSGI_APPLICATION = 'cmu_memes.wsgi.application'
 
+# Message tags
+
+from django.contrib.messages import constants as messages
+MESSAGE_TAGS = {
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 

@@ -81,6 +81,8 @@ class PasswordForm(forms.Form):
 		return pwd
 
 class MemeForm(forms.ModelForm):
+	next = forms.CharField(widget=forms.HiddenInput())
+
 	class Meta:
 		model = Meme
 		fields = ['title', 'picture']

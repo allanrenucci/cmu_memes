@@ -19,11 +19,14 @@ class Meme(models.Model):
 		return string
 
 	@staticmethod
-	def get_memes(author=None):
-		if author is None:
-			return Meme.objects.all().order_by('-date')
+	def get_memes(author=None, order='-date'):
 
-		return Meme.objects.filter(author=author).order_by('-date')
+		if author:
+			memes = Meme.objects.filter(author=author)
+		else:
+			memes = Meme.objects.all()
+
+		return memes.order_by(order)
 	
 class Vote(models.Model):
 	UP = 1

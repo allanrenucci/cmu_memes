@@ -1,5 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 
+# Need to send notifications
+from django.contrib import messages
+
+# Needed to use reverse
+from django.core.urlresolvers import reverse
+
 # Decorator require_POST
 from django.views.decorators.http import require_POST
 
@@ -25,70 +31,93 @@ from mimetypes import guess_type
 from models import *
 from forms import *
 
-def about(request):
-	return render(request, 'website/about.html')
-
+@login_required
 def home(request):
+	return redirect('new')
+
+@login_required
+def new(request):
 	context = {}
-	context['memes'] = Meme.get_memes()
-	context['form'] = MemeForm()
+	context['active'] = 'new'
+	context['memes'] =  Meme.get_memes(order='-date')
+	context['form'] = MemeForm(initial={'next': reverse('new')})
+
 	return render(request, 'website/index.html', context)
+
+@login_required
+def best(request):
+	context = {}
+	context['active'] = 'best'
+	context['memes'] =  Meme.get_memes(order='-up_vote_count')
+	context['form'] = MemeForm(initial={'next': reverse('best')})
+
+	return render(request, 'website/index.html', context)
+
+def about(request):
+	context = { 'active': 'about' }
+	return render(request, 'website/about.html', context)
 
 
 @transaction.atomic
 def register(request):
-	context = {}
-
 	# Just display the registration form if this is a GET request
 	if request.method == 'GET':
+		context = {}
+		context['active'] = 'register'
 		context['form'] = RegistrationForm()
 		return render(request, 'registration/register.html', context)
 
 	new_user = User()
 	form = RegistrationForm(request.POST, instance=new_user)
 
-	# Checks the validity of the form data
-	if not form.is_valid():
-		context['form'] = form
-		return render(request, 'registration/register.html', context)
+	if form.is_valid():
+		# Hack to hash password
+		password = new_user.password
+		new_user.set_password(password)
+		form.save()
+		messages.success(request, 'Account successfully created!')
 
-	# Hack to hash password
-	password = new_user.password
-	new_user.set_password(password)
-	form.save()
+		new_user = authenticate(username=new_user.username, password=password)
+		login(request, new_user)
+		
+		return redirect('home')
+		
+	context = {}
+	context['active'] = 'register'
+	context['form'] = form
 
-	new_user = authenticate(username=new_user.username, password=password)
-	login(request, new_user)
-	return redirect('home')
+	return render(request, 'registration/register.html', context)
+
 
 @login_required
 def profile(request):
-	context = {}
 	user = request.user
 
+	context = {}
+	context['active'] = 'profile'
 	context['memes'] = Meme.get_memes(author=user)
 	context['password_form'] = PasswordForm()
 	context['profile_form'] = ProfileForm(instance=user)
+
 	return render(request, 'registration/profile.html', context)
 
 @require_POST
 @login_required
 @transaction.atomic
 def set_password(request):
-	context = {}
 	user = request.user
-
 	form = PasswordForm(user.username, request.POST)
 
 	if form.is_valid():
 		pwd = form.cleaned_data['new_password']
 		user.set_password(pwd)
 		user.save()
-		context['password_form'] = PasswordForm()
-		context['infos'] = ['Password successfully changed!']
-	else:
-		context['password_form'] = form
+		messages.success(request, 'Password updated.')
+		return redirect('profile')
 
+	context = {}
+	context['active'] = 'profile'
+	context['password_form'] = form
 	context['memes'] = Meme.get_memes(author=user)
 	context['profile_form'] = ProfileForm(instance=user)
 	return render(request, 'registration/profile.html', context)
@@ -97,46 +126,47 @@ def set_password(request):
 @login_required
 @transaction.atomic
 def update_profile(request):
-	context = {}
 	user = request.user
-
 	form = ProfileForm(request.POST, instance=user)
 
 	if form.is_valid():
 		form.save()
-		context['profile_form'] = ProfileForm(instance=user)
-		context['infos'] = ['Profile successfully updated!']
-	else:
-		context['profile_form'] = form
-	
+		messages.success(request, 'Profile details updated.')
+		return redirect('profile')
+
+	context = {}
+	context['active'] = 'profile'
+	context['password_form'] = form
 	context['memes'] = Meme.get_memes(author=user)
-	context['password_form'] = PasswordForm()
+	context['profile_form'] = ProfileForm(instance=user)
+
 	return render(request, 'registration/profile.html', context)
 
 @login_required
 @transaction.atomic
 def delete_profile(request):
-	context = {}
 	request.user.delete()
 	logout(request)
-	context['memes'] = Meme.get_memes()
-	context['infos'] = ['Your account was successfully deleted!']
-	return render(request, 'website/index.html', context)
+	messages.success(request, 'Account successfully deleted!')
+	return redirect('home')
 
 @require_POST
 @login_required
 @transaction.atomic
 def post_meme(request):
-	context = {}
 	new_meme = Meme(author=request.user)
 	form = MemeForm(request.POST, request.FILES, instance=new_meme)
 
 	if form.is_valid():
 		form.save()
-		form = MemeForm()
+		messages.success(request, 'New meme successfully posted!')
+		next = form.cleaned_data['next']
+		return redirect(next)
 
+	context = {}
 	context['form'] = form
 	context['memes'] = Meme.get_memes()
+
 	return render(request, 'website/index.html', context)
 
 def get_picture(request, id):
@@ -159,7 +189,6 @@ def delete_meme(request, id):
 @login_required
 @transaction.atomic
 def meme_upvote(request, id):
-	data = {}
 	meme = get_object_or_404(Meme, id=id)
 
 	vote, _ = Vote.objects.get_or_create(
@@ -183,6 +212,7 @@ def meme_upvote(request, id):
 	meme.save()
 	vote.save()
 
+	data = {}
 	data['up_vote'] = meme.up_vote_count
 	data['down_vote'] = meme.down_vote_count
 	content = json.dumps(data)
@@ -192,7 +222,6 @@ def meme_upvote(request, id):
 @login_required
 @transaction.atomic
 def meme_downvote(request, id):
-	data = {}
 	meme = get_object_or_404(Meme, id=id)
 
 	vote, _ = Vote.objects.get_or_create(
@@ -216,6 +245,7 @@ def meme_downvote(request, id):
 	meme.save()
 	vote.save()
 
+	data = {}
 	data['up_vote'] = meme.up_vote_count
 	data['down_vote'] = meme.down_vote_count
 	content = json.dumps(data)
