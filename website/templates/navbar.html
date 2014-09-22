@@ -21,8 +21,8 @@
 			{% else %}
 				<li {% if active == "login" %}class="active"{% endif %}><a href="{% url 'login' %}">Login</a></li>
 				<li {% if active == "register" %}class="active"{% endif %}><a href="{% url 'register' %}">Register</a></li>
-				<li {% if active == "about" %}class="active"{% endif %}><a href="{% url 'about' %}">About</a></li>
 			{% endif %}
+			<li {% if active == "about" %}class="active"{% endif %}><a href="{% url 'about' %}">About</a></li>
 			</ul>
 		</div><!--/.nav-collapse -->
 	</div>
